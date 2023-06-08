@@ -27,7 +27,7 @@ const camera = new THREE.PerspectiveCamera(
     1000
 )
 
-camera.position.set(0,2,5);
+camera.position.set(8,3,0);
 
 const renderer = new THREE.WebGLRenderer(
     {
@@ -65,7 +65,7 @@ const ground = new Entity.Box({
   scene.add(ground);
 
 const blueBox = new Entity.Box({
-    width: 0.3,
+    width: 2,
     height: 0.3,
     depth : 0.3,
     position: {
@@ -149,11 +149,11 @@ function animate() {
     updateBullets();
     blueBox.velocity.x = 0
     blueBox.velocity.z = 0
-    if (keys.a.pressed) blueBox.velocity.x = -0.05 * speedModifier
-    else if (keys.d.pressed) blueBox.velocity.x = 0.05 * speedModifier
+    if (keys.a.pressed) blueBox.velocity.z = 0.05 * speedModifier
+    else if (keys.d.pressed) blueBox.velocity.z = -0.05 * speedModifier
 
-    if (keys.s.pressed) blueBox.velocity.z = 0.05 * speedModifier
-    else if (keys.w.pressed) blueBox.velocity.z = -0.05 * speedModifier
+    if (keys.s.pressed) blueBox.velocity.x = 0.05 * speedModifier
+    else if (keys.w.pressed) blueBox.velocity.x = -0.05 * speedModifier
 
     if (keys.shift.pressed) {
         blueBox.material.color.set('#f41173');
