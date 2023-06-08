@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+
+<head>
+    <title>Test</title>
+    <style>
+        body {
+            margin: 0;
+            background: #e0ad04;
+        }
+    </style>
+
+    <script
+        async
+        src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"
+    ></script>
+
+    <script type="importmap">
+        {
+            "imports": {
+            "three": "https://unpkg.com/three@0.153.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.153.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module", src="main.js"></script>
+    <script type="module", src="entities.js"></script>
+
+</head>
