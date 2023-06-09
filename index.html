@@ -5,18 +5,45 @@
   <style>
     body {
       margin: 0;
-      background-image: linear-gradient(180deg, #51a2d4, #87CEEB);
-      /* background: linear-gradient(to top, #87CEEB, #000080); */
-      /* background: #04a2e0;
-      background-image: url('assets/index.jpeg'); */
+      background-image: linear-gradient(180deg, #aacee4, #ffffff);
     }
+    #container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#overlay {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+#hud {
+  margin: 0; align-items: center; padding-left: 16px;
+  width: 200px;
+  background-color: #3030304f;
+  color: #ffffff;
+}
+
   </style>
+<div id="container">
+  <div id="overlay">
+    <div id="hud">
+      <h1  id="score">Score: 0 - 0</h1>
+      <h2>'R' : Restart</h2>
+    </div>
+  </div>
+</div>
 
   <script
     async
     src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"
   ></script>
 
+  
   <script type="importmap">
     {
       "imports": {

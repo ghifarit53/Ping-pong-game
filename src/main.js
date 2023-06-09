@@ -20,6 +20,9 @@ import  { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import * as Patterns from './patternspawner.js'
 import * as Entity from './entities.js';
 
+let cooldown = false;
+let scorep1=0;
+let scorep2=0;
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
     75,
@@ -29,7 +32,7 @@ const camera = new THREE.PerspectiveCamera(
 )
 
 
-camera.position.set(15,8,0);
+camera.position.set(0,18,20);
 
 const renderer = new THREE.WebGLRenderer(
     {
@@ -57,6 +60,7 @@ light.position.set(0, 10, 0);
 light.target.position.set(0, 0, 0);
 scene.add(light);
 scene.add(light.target);
+
 
 // // skybox
 // const textureLoadersky = new THREE.TextureLoader();
@@ -138,7 +142,11 @@ const loader = new GLTFLoader();
 let ball;
 loader.load('assets/ball/scene.gltf', function (gltf) {
   ball = gltf.scene;
+// Set the desired center point
+  var center = new THREE.Vector3(1, 0.2, 0);
 
+  // Adjust the position based on the center point
+  ball.position.sub(center);
   // You can manipulate the loaded model here if needed
   // ball.position.y = -0.5;
   scene.add(ball);
@@ -174,6 +182,74 @@ function load_buildings(x,z){
 
 }
 
+load_trees(0,50);
+load_trees(0, -50);
+load_trees(50, -50);
+load_trees(50, 50);
+load_trees(-50, -50);
+load_trees(-50, 50);
+load_trees(50, 0);
+load_trees(-50, 0);
+
+
+function load_trees(x,z){
+  const loaderp = new GLTFLoader();
+  let paddle;
+  loader.load('assets/trees/scene.gltf', function (gltf) {
+    paddle = gltf.scene;
+
+    // You can manipulate the loaded model here if needed
+    // ball.position.y = -0.5;
+    scene.add(paddle);
+    paddle.position.y = -0.5;
+    paddle.position.x = x;
+    paddle.position.z = z;
+    if(z<0){
+      paddle.rotation.y = Math.PI;
+    }
+  });
+}
+
+const loaderp = new GLTFLoader();
+  let paddle;
+  loader.load('assets/goal/scene.gltf', function (gltf) {
+    paddle = gltf.scene;
+
+    // You can manipulate the loaded model here if needed
+    // ball.position.y = -0.5;
+    paddle.scale.x = 0.01;
+    paddle.scale.y = 0.01;
+    paddle.scale.z = 0.015;
+    paddle.position.y = -0.5;
+    paddle.position.z = 13;
+    paddle.rotateY(Math.PI/2)
+    scene.add(paddle);
+
+    // if(z<0){
+    //   paddle.rotation.y = Math.PI;
+    // }
+  });
+
+  const loaderp2 = new GLTFLoader();
+  let paddle2;
+  loaderp2.load('assets/goal/scene.gltf', function (gltf) {
+    paddle2 = gltf.scene;
+
+    // You can manipulate the loaded model here if needed
+    // ball.position.y = -0.5;
+    paddle2.scale.x = 0.01;
+    paddle2.scale.y = 0.01;
+    paddle2.scale.z = 0.015;
+    paddle2.position.y = -0.5;
+    paddle2.position.z = -13;
+    paddle2.rotateY(Math.PI*3/2)
+    scene.add(paddle2);
+
+    // if(z<0){
+    //   paddle.rotation.y = Math.PI;
+    // }
+  });
+
 const player = new Entity.Box({
     width: 4,
     height: 1,
@@ -182,7 +258,7 @@ const player = new Entity.Box({
     position: {
         x: 0,
         y: 0,
-        z: 10
+        z: 9
     }
 });
 player.receiveShadow = true;
@@ -198,7 +274,7 @@ const enemy = new Entity.Box({
   position: {
       x: 0,
       y: 0,
-      z: -10
+      z: -9
   }
 });
 enemy.receiveShadow = true;
@@ -227,18 +303,18 @@ const keys = {
 
   window.addEventListener('keydown', (event) => {
     switch (event.code) {
-      case 'KeyA':
-        keys.a.pressed = true
-        break
-      case 'KeyD':
-        keys.d.pressed = true
-        break
-      case 'KeyS':
-        keys.s.pressed = true
-        break
-      case 'KeyW':
-        keys.w.pressed = true
-        break
+        case 'KeyR':
+          scorep1=0;
+          scorep2=0;
+          updatescore();
+          break
+        case 'KeyD':
+          keys.s.pressed = true
+          break
+
+        case 'KeyA':
+          keys.w.pressed = true
+          break
       case 'Space':
         player.velocity.y = 0.08
         break
@@ -250,18 +326,13 @@ const keys = {
 
   window.addEventListener('keyup', (event) => {
     switch (event.code) {
-      case 'KeyA':
-        keys.a.pressed = false
-        break
-      case 'KeyD':
-        keys.d.pressed = false
-        break
-      case 'KeyS':
-        keys.s.pressed = false
-        break
-      case 'KeyW':
-        keys.w.pressed = false
-        break
+        case 'KeyD':
+          keys.s.pressed = false
+          break
+
+        case 'KeyA':
+          keys.w.pressed = false
+          break
       case 'ShiftLeft':
         keys.shift.pressed = false
         break
@@ -269,12 +340,35 @@ const keys = {
   })
 
 let speedModifier = 1;
-let vb_x = 0;
+let vb_x = Math.random() - 0.5;
 let vb_z = 0.2;
 
+let cooldown_started = false;
 function animate() {
     const animationId = requestAnimationFrame(animate);
     renderer.render(scene, camera);
+
+    if(cooldown) {
+      setTimeout(()=>{
+        vb_x = Math.random() - 0.5;
+        vb_z = 0.2;
+        cooldown_started = false;
+        player.position.x =0;
+        player.position.y =0;
+        player.position.z =9;
+  
+        enemy.position.x = 0;
+        enemy.position.y = 0;
+        enemy.position.z = -9;
+  
+        ball.position.x = 1;
+        ball.position.y = 0.2;
+        ball.position.z = 0;
+      }, 1000)
+      cooldown_started=true;
+      cooldown=false;
+      return;
+    } else if(cooldown_started) return;
 
     updateCollision();
     updateBullets();
@@ -300,17 +394,23 @@ function animate() {
     //   player.scale.set(1,1,1);
     //   speedModifier = 1.25;
     // }
-    
-    enemy.position.x += enemy.position.x < ball.position.x ? 0.3 : -0.3;
+    enemy.position.x += enemy.position.x < ball.position.x ? 0.15 : -0.15;
     enemy.update(ground);
     player.update(ground);
     
 }
 
+
+function updatescore() {
+  const h1Element = document.getElementById('score');
+  h1Element.textContent = 'Score: ' + scorep1 + ' - ' + scorep2;
+  cooldown = true;  
+}
+
 function check_player_boundary() {
     if (camera.position.y<0) camera.position.y = 0;
-    if (player.position.x > 6)player.position.x=6;
-    if (player.position.x < -6)player.position.x=-6;
+    if (player.position.x > 8)player.position.x=8;
+    if (player.position.x < -8)player.position.x=-8;
     if (player.position.z < 0)player.position.z=0;
     if (player.position.z > 12)player.position.z=12;
     if(ball.position.x>9 || ball.position.x<-9){
@@ -328,30 +428,44 @@ function check_player_boundary() {
       } else {
         vb_z *= -1;
       }
+
+      if(ball.position.x<3&&ball.position.x>-4.3){
+        if(ball.position.z>0){
+          scorep2++;
+        } else {
+          scorep1++;
+        }
+        updatescore();
+      }
     }
 
     const box1 = new THREE.Box3().setFromObject(player);
     const box2 = new THREE.Box3().setFromObject(ball);
     if(box1.intersectsBox(box2))  {
-      vb_z *= -1;
+      vb_z *= -1.1;
+      if(vb_z>0) ball.position.z += 1;
+      else ball.position.z -= 1;
       if(player.velocity.x!=0) {
-        vb_x += player.velocity.x/4;
+        vb_x += player.velocity.x/2;
         // if(player.velocity.x<0&&vb_x<0||player.velocity.x>0&&vb_x>0) vb_x*=-0.5;
 
       } 
-      if(player.velocity.z!=0) {
-        vb_z = player.velocity.z + -vb_z/4;
-        if(player.velocity.z>0&&vb_z>0||player.velocity.z>0&&vb_z>0) vb_z*=-0.5;
-      } 
+      // if(player.velocity.z!=0) {
+      //   vb_z = player.velocity.z + -vb_z/4;
+      //   if(player.velocity.z>0&&vb_z>0||player.velocity.z>0&&vb_z>0) vb_z*=-0.5;
+      // } 
     }
 
     const box3 = new THREE.Box3().setFromObject(enemy);
     if(box3.intersectsBox(box2)){
-      if(vb_z>0.5) {
-        vb_z *= -0.8;
-      } else {
-        vb_z *= -1;
-      }      
+      vb_z *= -1.1;
+      if(vb_z>0) ball.position.z += 1;
+      else ball.position.z -= 1;
+      // if(vb_z>0.5) {
+      //   vb_z *= -0.8;
+      // } else {
+      //   vb_z *= -1;
+      // }      
     }
 
     if(vb_z>1.5) vb_z = 1.5;
