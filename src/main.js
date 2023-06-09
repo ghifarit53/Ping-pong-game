@@ -29,7 +29,7 @@ const camera = new THREE.PerspectiveCamera(
 )
 
 
-camera.position.set(10,15,0);
+camera.position.set(15,8,0);
 
 const renderer = new THREE.WebGLRenderer(
     {
@@ -100,6 +100,17 @@ scene.add(light.target);
   ground.receiveShadow = true;
   scene.add(ground);
   
+  const textureLoaderterr = new THREE.TextureLoader();
+  const textureterr = textureLoaderterr.load('assets/terr.jpeg');
+  
+  const materialterr = new THREE.MeshStandardMaterial({ map: textureterr, shadowSide: THREE.FrontSide });
+  
+  const geometryterr = new THREE.BoxGeometry(310, 0.4, 230);
+  const groundterr = new THREE.Mesh(geometryterr, materialterr);
+  groundterr.position.set(0, -1, 0);
+  groundterr.rotation.y = Math.PI / 2; // Rotate 90 degrees (π/2 radians)
+  groundterr.receiveShadow = true;
+  scene.add(groundterr);
 
 //   const textureLoader = new THREE.TextureLoader();
 //   const texture = textureLoader.load('assets/field.png');
@@ -125,19 +136,49 @@ scene.add(light.target);
 
 const loader = new GLTFLoader();
 let ball;
-loader.load('assets/scene.gltf', function (gltf) {
+loader.load('assets/ball/scene.gltf', function (gltf) {
   ball = gltf.scene;
 
   // You can manipulate the loaded model here if needed
-  ball.position.y = -0.5;
+  // ball.position.y = -0.5;
   scene.add(ball);
 });
 
+load_buildings(-15,0);
+load_buildings(-15,10);
+load_buildings(-15,20);
+load_buildings(-15,-10);
+load_buildings(-15,-20);
+load_buildings(15,0);
+load_buildings(15,10);
+load_buildings(15,20);
+load_buildings(15,-10);
+load_buildings(15,-20);
+
+function load_buildings(x,z){
+  const loaderp = new GLTFLoader();
+  let paddle;
+  loader.load('assets/building/scene.gltf', function (gltf) {
+    paddle = gltf.scene;
+
+    // You can manipulate the loaded model here if needed
+    // ball.position.y = -0.5;
+    scene.add(paddle);
+    paddle.position.y = -0.5;
+    paddle.position.x = x;
+    paddle.position.z = z;
+    if(x>0){
+      paddle.rotation.y = Math.PI;
+    }
+  });
+
+}
 
 const player = new Entity.Box({
-    width: 8,
+    width: 4,
     height: 1,
     depth : 1,
+    color: 0x3489eb,
     position: {
         x: 0,
         y: 0,
@@ -149,9 +190,11 @@ player.castShadow = true;
 scene.add(player);
 
 const enemy = new Entity.Box({
-  width: 8,
+  width: 4,
   height: 1,
   depth : 1,
+      color: 0xeb4034,
+
   position: {
       x: 0,
       y: 0,
@@ -247,16 +290,16 @@ function animate() {
     if (keys.s.pressed) player.velocity.x = 0.3 * speedModifier
     else if (keys.w.pressed) player.velocity.x = -0.3 * speedModifier
     
-    if (keys.shift.pressed) {
-      player.material.color.set('#f41173');
-      player.scale.set(0.75,0.75,0.75);
-      speedModifier = 0.6;
-    }
-    else {
-      player.material.color.set('#00ff00');
-      player.scale.set(1,1,1);
-      speedModifier = 1.25;
-    }
+    // if (keys.shift.pressed) {
+    //   player.material.color.set('#f41173');
+    //   player.scale.set(0.75,0.75,0.75);
+    //   speedModifier = 0.6;
+    // }
+    // else {
+    //   player.material.color.set('#00ff00');
+    //   player.scale.set(1,1,1);
+    //   speedModifier = 1.25;
+    // }
     
     enemy.position.x += enemy.position.x < ball.position.x ? 0.3 : -0.3;
     enemy.update(ground);
