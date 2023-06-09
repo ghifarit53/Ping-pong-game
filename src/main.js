@@ -64,7 +64,7 @@ const ground = new Entity.Box({
   ground.receiveShadow = true;
   scene.add(ground);
 
-const blueBox = new Entity.Box({
+const player = new Entity.Box({
     width: 2,
     height: 0.3,
     depth : 0.3,
@@ -74,8 +74,8 @@ const blueBox = new Entity.Box({
         z: 2
     }
 });
-blueBox.receiveShadow = true;
-scene.add(blueBox);
+player.receiveShadow = true;
+scene.add(player);
 
 const enemies = [];
 
@@ -112,7 +112,7 @@ const keys = {
         keys.w.pressed = true
         break
       case 'Space':
-        blueBox.velocity.y = 0.08
+        player.velocity.y = 0.08
         break
       case 'ShiftLeft':
         keys.shift.pressed = true
@@ -145,28 +145,29 @@ let speedModifier = 1;
 function animate() {
     const animationId = requestAnimationFrame(animate);
     renderer.render(scene, camera);
-
+    
+    updateCollision();
     updateBullets();
-    blueBox.velocity.x = 0
-    blueBox.velocity.z = 0
-    if (keys.a.pressed) blueBox.velocity.z = 0.05 * speedModifier
-    else if (keys.d.pressed) blueBox.velocity.z = -0.05 * speedModifier
-
-    if (keys.s.pressed) blueBox.velocity.x = 0.05 * speedModifier
-    else if (keys.w.pressed) blueBox.velocity.x = -0.05 * speedModifier
-
+    player.velocity.x = 0
+    player.velocity.z = 0
+    if (keys.a.pressed) player.velocity.z = 0.05 * speedModifier
+    else if (keys.d.pressed) player.velocity.z = -0.05 * speedModifier
+    
+    if (keys.s.pressed) player.velocity.x = 0.05 * speedModifier
+    else if (keys.w.pressed) player.velocity.x = -0.05 * speedModifier
+    
     if (keys.shift.pressed) {
-        blueBox.material.color.set('#f41173');
-        blueBox.scale.set(0.75,0.75,0.75);
-        speedModifier = 0.6;
+      player.material.color.set('#f41173');
+      player.scale.set(0.75,0.75,0.75);
+      speedModifier = 0.6;
     }
     else {
-        blueBox.material.color.set('#00ff00');
-        blueBox.scale.set(1,1,1);
-        speedModifier = 1.25;
+      player.material.color.set('#00ff00');
+      player.scale.set(1,1,1);
+      speedModifier = 1.25;
     }
-
-    blueBox.update(ground)
+    
+    player.update(ground)
     
 }
 
@@ -206,6 +207,20 @@ function updateBullets() {
     }
 }
 
+function updateCollision(){
+  enemies.forEach(enemy => {
+    let collision = Entity.boxCollision(player,enemy);
+    if(collision && !enemy.collided){
+      console.log("hit");
+      enemy.velocity.z = enemy.velocity.z * -1;
+      enemy.collided = true;
+    }
+    else if(!collision) {
+      enemy.collided = false;
+    }
+  })
+}
+
 /*
 more patterns = slower
 need a way to clear bullets
@@ -213,9 +228,6 @@ need a way to clear bullets
   2. by out of bounds -> if out of bounds, then delete
 */
 setInterval(animateProjectiles, 3200);
-setInterval(animateProjectiles, 3250);
-setInterval(animateProjectiles, 3500);
-setInterval(animateProjectiles, 3500);
-setInterval(animateProjectiles, 3600);
+
 
 animate();

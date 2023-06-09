@@ -18,7 +18,8 @@ export class Box extends THREE.Mesh {
                 y : 0,
                 z : 0
             },
-            zAccel = false
+            zAccel = false,
+            collided = false
         }) {
            super(
                 new THREE.BoxGeometry(width,height,depth),
@@ -44,6 +45,7 @@ export class Box extends THREE.Mesh {
             this.gravity = -0.002;
 
             this.zAccel = zAccel;
+            this.collided = collided
         }
     
     updateSides() {
@@ -63,4 +65,12 @@ export class Box extends THREE.Mesh {
         this.position.x += this.velocity.x;
         this.position.z += this.velocity.z;
     }
+}
+
+export function boxCollision(box1, box2) {
+    const posCollisionX = box1.right >= box2.left && box1.left <= box2.right;
+    const posCollisionY = box1.bottom + box1.velocity.y <= box2.top && box1.top >= box2.bottom;
+    const posCollisionZ = box1.front >= box2.back && box1.back <= box2.front;
+
+    return posCollisionX && posCollisionY && posCollisionZ;
 }
