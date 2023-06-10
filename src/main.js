@@ -283,6 +283,17 @@ scene.add(enemy);
 
 const enemies = [];
 
+function update_difficulty() {
+  let modes = ''
+  if(difficulty==1) modes = 'Easy'
+  else if(difficulty==2) modes = 'Medium'
+  else if(difficulty==3)modes = 'Hard'
+  else modes = 'Impossible'
+  
+  const h1Element = document.getElementById('mode');
+  h1Element.textContent = 'Mode: ' + modes;
+}
+
 const keys = {
     a: {
       pressed: false
@@ -315,6 +326,28 @@ const keys = {
         case 'KeyA':
           keys.w.pressed = true
           break
+          case 'Digit1':
+            enemy_speed = 0.1;
+            difficulty = 1;
+            update_difficulty();
+                        break
+            case 'Digit2':
+              enemy_speed = 0.25;
+              difficulty = 2;    
+              update_difficulty();          
+              break
+              case 'Digit3':
+                enemy_speed = 0.4;
+                difficulty = 3;
+                update_difficulty();
+
+                break
+                case 'Digit4':
+                  enemy_speed = 2;
+                  difficulty = 3.8;
+                  update_difficulty();
+  
+                  break
       case 'Space':
         player.velocity.y = 0.08
         break
@@ -341,7 +374,10 @@ const keys = {
 
 let speedModifier = 1;
 let vb_x = Math.random() - 0.5;
-let vb_z = 0.2;
+let player_turn = true;
+let vb_z = player_turn ? 0.2 : -0.2;
+let enemy_speed = 0.15;
+let difficulty = 1;
 
 let cooldown_started = false;
 function animate() {
@@ -351,7 +387,7 @@ function animate() {
     if(cooldown) {
       setTimeout(()=>{
         vb_x = Math.random() - 0.5;
-        vb_z = 0.2;
+        vb_z = player_turn ? 0.2 : -0.2;
         cooldown_started = false;
         player.position.x =0;
         player.position.y =0;
@@ -394,7 +430,8 @@ function animate() {
     //   player.scale.set(1,1,1);
     //   speedModifier = 1.25;
     // }
-    enemy.position.x += enemy.position.x < ball.position.x ? 0.15 : -0.15;
+    enemy.position.x += enemy.position.x < ball.position.x ? enemy_speed : -enemy_speed;
+    if(Math.abs(enemy.position.x-ball.position.x)<=Math.abs(enemy_speed)) enemy.position.x=ball.position.x;
     enemy.update(ground);
     player.update(ground);
     
@@ -404,6 +441,7 @@ function animate() {
 function updatescore() {
   const h1Element = document.getElementById('score');
   h1Element.textContent = 'Score: ' + scorep1 + ' - ' + scorep2;
+  player_turn = !player_turn;
   cooldown = true;  
 }
 
@@ -413,10 +451,10 @@ function check_player_boundary() {
     if (player.position.x < -8)player.position.x=-8;
     if (player.position.z < 0)player.position.z=0;
     if (player.position.z > 12)player.position.z=12;
-    if(ball.position.x>9 || ball.position.x<-9){
-      ball.position.x= ball.position.x>0 ? 9 : -9;
+    if(ball.position.x>9 || ball.position.x<-11){
+      ball.position.x= ball.position.x>0 ? 9 : -11;
       if(vb_x>0.5) {
-        vb_x *= -0.7;
+        vb_x *= -1;
       } else {
         vb_x *= -1;
       }    
@@ -424,7 +462,7 @@ function check_player_boundary() {
     if(ball.position.z>12 || ball.position.z<-12){
       ball.position.z= ball.position.z>0 ? 12 : -12;
       if(vb_z>0.5) {
-        vb_z *= -0.7;
+        vb_z *= -1;
       } else {
         vb_z *= -1;
       }
@@ -443,8 +481,10 @@ function check_player_boundary() {
     const box2 = new THREE.Box3().setFromObject(ball);
     if(box1.intersectsBox(box2))  {
       vb_z *= -1.1;
-      if(vb_z>0) ball.position.z += 1;
-      else ball.position.z -= 1;
+      do{
+        if(vb_z>0) ball.position.z += 1;
+        else ball.position.z -= 1;
+      } while(Math.abs(ball.position.z-player.position.z)<1.5);  
       if(player.velocity.x!=0) {
         vb_x += player.velocity.x/2;
         // if(player.velocity.x<0&&vb_x<0||player.velocity.x>0&&vb_x>0) vb_x*=-0.5;
@@ -459,8 +499,10 @@ function check_player_boundary() {
     const box3 = new THREE.Box3().setFromObject(enemy);
     if(box3.intersectsBox(box2)){
       vb_z *= -1.1;
-      if(vb_z>0) ball.position.z += 1;
-      else ball.position.z -= 1;
+      do{
+        if(vb_z>0) ball.position.z += 1;
+        else ball.position.z -= 1;
+      } while(Math.abs(ball.position.z-enemy.position.z)<1.5); 
       // if(vb_z>0.5) {
       //   vb_z *= -0.8;
       // } else {
@@ -468,10 +510,10 @@ function check_player_boundary() {
       // }      
     }
 
-    if(vb_z>1.5) vb_z = 1.5;
-    if(vb_z<-1.5) vb_z = -1.5;
-    if(vb_x>1.5) vb_x = 1.5;
-    if(vb_x<-1.5) vb_x = -1.5;  
+    if(vb_z>2) vb_z = 2;
+    if(vb_z<-2) vb_z = -2;
+    if(vb_x>2) vb_x = 2;
+    if(vb_x<-2) vb_x = -2;  
 }
 
 function isPlayerColide(box1, box2) {
@@ -543,6 +585,126 @@ function updateCollision(){
     }
     })
 }
+
+function addButton() {
+  // Create a button element
+  var button = document.createElement('button');
+  button.textContent = '<<';
+  button.setAttribute('style', 'width: 200px;height:200px;margin: 16px;font-size:48px;  user-select: none;');
+
+  // Add touch start event listener
+  button.addEventListener('touchstart', function() {
+    keys.w.pressed = true
+  });
+
+  // Add touch end event listener
+  button.addEventListener('touchend', function() {
+    keys.w.pressed = false
+  });
+
+  // Create a container for the button
+  var buttonContainer = document.createElement('div');
+  buttonContainer.id = 'button-container';
+  buttonContainer.appendChild(button);
+
+  var button2 = document.createElement('button');
+  button2.textContent = '>>';
+  button2.setAttribute('style', 'width: 200px;height:200px;margin: 16px;font-size:48px;  user-select: none;  ');
+  // Add touch start event listener
+  button2.addEventListener('touchstart', function() {
+    keys.s.pressed = true
+  });
+
+  // Add touch end event listener
+  button2.addEventListener('touchend', function() {
+    keys.s.pressed = false
+  });
+
+  buttonContainer.appendChild(button2);
+
+  // Append the container to the document body
+  document.body.appendChild(buttonContainer);
+
+  var buttonR = document.createElement('button');
+  buttonR.textContent = 'R';
+  buttonR.setAttribute('style', 'width: 100px;height:50px;margin: 16px;font-size:16px;  user-select: none;  ');
+
+  // Add touch start event listener
+  buttonR.addEventListener('click', function() {
+    console.log('Touch started!');
+    scorep1=0;
+    scorep2=0;
+    updatescore();
+  });
+
+  // Append the container to the document body
+  document.getElementById('overlay').appendChild(buttonR);
+
+  var button1 = document.createElement('button');
+  button1.textContent = '1';
+  button1.setAttribute('style', 'width: 100px;height:50px;margin: 16px;font-size:16px;  user-select: none;  ');
+
+  // Add touch start event listener
+  button1.addEventListener('click', function() {
+    enemy_speed = 0.1;
+    difficulty = 1;
+    update_difficulty();
+  });
+
+  // Append the container to the document body
+  document.getElementById('overlay').appendChild(button1);
+
+  var button2 = document.createElement('button');
+  button2.textContent = '2';
+  button2.setAttribute('style', 'width: 100px;height:50px;margin: 16px;font-size:16px;  user-select: none;  ');
+
+  // Add touch start event listener
+  button2.addEventListener('click', function() {
+    enemy_speed = 0.25;
+    difficulty = 2;
+    update_difficulty();
+  });
+
+  // Append the container to the document body
+  document.getElementById('overlay').appendChild(button2);
+
+  var button3 = document.createElement('button');
+  button3.textContent = '3';
+  button3.setAttribute('style', 'width: 100px;height:50px;margin: 16px;font-size:16px;  user-select: none;  ');
+  // Add touch start event listener
+  button3.addEventListener('click', function() {
+    enemy_speed = 0.4;
+    difficulty = 3;
+    update_difficulty();
+  });
+
+  // Append the container to the document body
+  document.getElementById('overlay').appendChild(button3);
+
+  var button4 = document.createElement('button');
+  button4.textContent = '4';
+  button4.setAttribute('style', 'width: 100px;height:50px;margin: 16px;font-size:16px;  user-select: none;  ');
+
+  // Add touch start event listener
+  button4.addEventListener('click', function() {
+    enemy_speed = 2;
+    difficulty = 4;
+    update_difficulty();
+  });
+
+  // Append the container to the document body
+  document.getElementById('overlay').appendChild(button4);
+}
+
+// Check if the device is a mobile device
+var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+// If the device is a mobile device, add the button
+if (isMobile) {
+  addButton();
+}
+
+
 
 /*
 more patterns = slower
