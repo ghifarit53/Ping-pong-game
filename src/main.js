@@ -140,13 +140,13 @@ scene.add(light.target);
 
 const loader = new GLTFLoader();
 let ball;
-loader.load('assets/ball/scene.gltf', function (gltf) {
+loader.load('assets/ball2/scene.gltf', function (gltf) {
   ball = gltf.scene;
 // Set the desired center point
-  var center = new THREE.Vector3(1, 0.2, 0);
+  // var center = new THREE.Vector3(1, 0.2, 0);
 
-  // Adjust the position based on the center point
-  ball.position.sub(center);
+  // // Adjust the position based on the center point
+  // ball.position.sub(center);
   // You can manipulate the loaded model here if needed
   // ball.position.y = -0.5;
   scene.add(ball);
@@ -327,32 +327,30 @@ const keys = {
           keys.w.pressed = true
           break
           case 'Digit1':
-            enemy_speed = 0.1;
+            enemy_speed = 0.2;
             difficulty = 1;
             update_difficulty();
                         break
             case 'Digit2':
-              enemy_speed = 0.25;
+              enemy_speed = 0.5;
               difficulty = 2;    
               update_difficulty();          
               break
               case 'Digit3':
-                enemy_speed = 0.4;
+                enemy_speed = 0.7;
                 difficulty = 3;
                 update_difficulty();
 
                 break
                 case 'Digit4':
                   enemy_speed = 2;
-                  difficulty = 3.8;
+                  difficulty = 4;
                   update_difficulty();
   
                   break
       case 'Space':
-        player.velocity.y = 0.08
-        break
-      case 'ShiftLeft':
-        keys.shift.pressed = true
+        // keys.space.pressed = true
+        acceleration=0.5;
         break
     }
   })
@@ -365,9 +363,11 @@ const keys = {
 
         case 'KeyA':
           keys.w.pressed = false
+
           break
-      case 'ShiftLeft':
-        keys.shift.pressed = false
+      case 'Space':
+        // keys.space.pressed = false
+        acceleration=0;
         break
     }
   })
@@ -378,6 +378,7 @@ let player_turn = true;
 let vb_z = player_turn ? 0.2 : -0.2;
 let enemy_speed = 0.15;
 let difficulty = 1;
+let acceleration = 0;
 
 let cooldown_started = false;
 function animate() {
@@ -414,11 +415,11 @@ function animate() {
 
     player.velocity.x = 0
     player.velocity.z = 0
-    if (keys.a.pressed) player.velocity.z = 0.3 * speedModifier
-    else if (keys.d.pressed) player.velocity.z = -0.3 * speedModifier
+    if (keys.a.pressed) player.velocity.z = 0.3 * speedModifier + acceleration
+    else if (keys.d.pressed) player.velocity.z = -0.3 * speedModifier - acceleration
     
-    if (keys.s.pressed) player.velocity.x = 0.3 * speedModifier
-    else if (keys.w.pressed) player.velocity.x = -0.3 * speedModifier
+    if (keys.s.pressed) player.velocity.x = 0.3 * speedModifier + acceleration
+    else if (keys.w.pressed) player.velocity.x = -0.3 * speedModifier - acceleration
     
     // if (keys.shift.pressed) {
     //   player.material.color.set('#f41173');
